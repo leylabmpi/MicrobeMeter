@@ -99,7 +99,6 @@ shinyServer(function(input, output, session) {
       return(NULL)
     } else 
     if(! is.null(input$input_file)){
-      print(input$input_file)
       F = rename_tmp_file(input$input_file)
       df = read.delim(F, sep='\t', skip=2, fill=TRUE, 
                       stringsAsFactors=TRUE, col.names=tbl_cols)
@@ -111,6 +110,11 @@ shinyServer(function(input, output, session) {
     # calculations
     turbidityCalculator(df, time_unit=input$time_unit, round_unit=input$round_unit)
   })
+  
+  output$inputProvided = reactive({
+    return(!is.null(df_turbidity()))
+  })
+  outputOptions(output, 'inputProvided', suspendWhenHidden=FALSE)
   
   # plotly object of turbidity
   output$turbidity_curves = renderPlotly({

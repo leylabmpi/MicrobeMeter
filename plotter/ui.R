@@ -27,20 +27,33 @@ shinyUI(fluidPage(
       h4("Convert table between labware plate format and a long table format"),
       tabsetPanel(type = 'tabs', 
                   tabPanel("Input",
-                           fileInput('input_file', 
-                                     'OPTION 1: upload your MicrobeMeter output table (tab-delimited)'),
+                           fluidRow(
+                             column(6,
+                                    fileInput('input_file', 
+                                     'Upload your MicrobeMeter output table (tab-delimited)')
+                             ),
+                             column(2),
+                             column(4,
+                                    checkboxInput('paste_input', 'Paste input table instead of load a file?')
+                             )
+                           ),
+                           conditionalPanel(
+                             condition = "input.paste_input == true",
+                             textAreaInput('input_text',
+                                           'Paste your MicrobeMeter output table into this box (tab-delimited)',
+                                           width = '1000px',
+                                           height = '400px')
+                           ),
                            hr(),
-                           textAreaInput('input_text',
-                                         'OPTION 2: Paste your MicrobeMeter output table into this box (tab-delimited)',
-                                         width = '1000px',
-                                         height = '400px')
+                           conditionalPanel("output.inputProvided",
+                            h4('Data table'),
+                            DT::dataTableOutput('turbidity_tbl')
+                           )
                            ),
                   tabPanel('Turbidity plot', 
                            plotlyOutput('turbidity_curves')),
                   tabPanel('Temperature plot', 
                            plotlyOutput('temperature_curve')),
-                  tabPanel('Data table', 
-                           DT::dataTableOutput('turbidity_tbl')),
                   tabPanel('Example input', 
                            DT::dataTableOutput('ex_data'))
       )
