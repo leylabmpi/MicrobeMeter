@@ -100,11 +100,11 @@ shinyServer(function(input, output, session) {
     } else 
     if(! is.null(input$input_file)){
       F = rename_tmp_file(input$input_file)
-      df = read.delim(F, sep='\t', skip=2, fill=TRUE, 
+      df = read.delim(F,                     sep='\t', skip=2, fill=TRUE, header=FALSE,
                       stringsAsFactors=TRUE, col.names=tbl_cols)
     } else
     if(input$input_text != ''){
-      df = read.delim(text=input$input_text, sep='\t', skip=2, fill=TRUE,
+      df = read.delim(text=input$input_text, sep='\t', skip=2, fill=TRUE, header=FALSE,
                       stringsAsFactors=TRUE, col.names=tbl_cols)
     }
     # calculations
