@@ -30,11 +30,12 @@ shinyUI(fluidPage(
                            fluidRow(
                              column(6,
                                     fileInput('input_file', 
-                                     'Upload your MicrobeMeter output table (tab-delimited)')
+                                              'Upload >=1 MicrobeMeter output tables (tab-delimited)',
+                                              multiple = TRUE)
                              ),
                              column(2),
                              column(4,
-                                    checkboxInput('paste_input', 'Paste input table instead of load a file?')
+                                    checkboxInput('paste_input', 'Paste input table instead of load >=1 file?')
                              )
                            ),
                            conditionalPanel(

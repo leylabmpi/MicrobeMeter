@@ -18,7 +18,7 @@ turbidityCalculator = function(turbidityCTMD, time_unit=1, round_unit=3) {
   # formatting 
   time_unit = as.numeric(time_unit)
   colnames(turbidityCTMD) = c('Time', 'Temperature', 'Port_1', 
-                              'Port_2', 'Port_3', 'Port_4', 'X')
+                              'Port_2', 'Port_3', 'Port_4', 'X', 'File')
   
   # Getting rid of unwanted information
   turbidityCTMD = turbidityCTMD[,c(-7)]
@@ -65,15 +65,17 @@ turbidity_plot = function(turbidityCTMD, plot_type=c('smooth'),
   # base plot object
   if(plot_content == 'turbidity'){
     p = turbidityCTMD %>%
-      gather(Port, Turbidity, -Time, -Temperature) %>%
+      gather(Port, Turbidity, -Time, -Temperature, -File) %>%
       ggplot(aes(Time, Turbidity, color=Port)) +
       labs(x=x_label) +
+      facet_wrap(~ File) +
       theme_bw() 
   } else {
     p = turbidityCTMD %>%
-      dplyr::select(Time, Temperature) %>%
+      dplyr::select(Time, Temperature, File) %>%
       ggplot(aes(Time, Temperature)) +
       labs(x=x_label) +
+      facet_wrap(~ File) +
       theme_bw() 
   }
   
@@ -99,9 +101,15 @@ shinyServer(function(input, output, session) {
       return(NULL)
     } else 
     if(! is.null(input$input_file)){
-      F = rename_tmp_file(input$input_file)
-      df = read.delim(F,                     sep='\t', skip=2, fill=TRUE, header=FALSE,
-                      stringsAsFactors=TRUE, col.names=tbl_cols)
+      F = apply(input$input_file, 1, rename_tmp_file)
+      df = list()
+      for(i in 1:nrow(input$input_file)){
+        x = read.delim(F[1], sep='\t', skip=2, fill=TRUE, header=FALSE, 
+                             stringsAsFactors=TRUE, col.names=tbl_cols)
+        x$File = input$input_file[i,'name']
+        df[[i]] = x
+      }
+      df = do.call(rbind, df)
     } else
     if(input$input_text != ''){
       df = read.delim(text=input$input_text, sep='\t', skip=2, fill=TRUE, header=FALSE,
