@@ -68,15 +68,16 @@ turbidity_plot = function(turbidityCTMD, plot_type=c('smooth'),
       gather(Port, Turbidity, -Time, -Temperature, -File) %>%
       ggplot(aes(Time, Turbidity, color=Port)) +
       labs(x=x_label) +
-      facet_wrap(~ File) +
       theme_bw() 
   } else {
     p = turbidityCTMD %>%
       dplyr::select(Time, Temperature, File) %>%
       ggplot(aes(Time, Temperature)) +
       labs(x=x_label) +
-      facet_wrap(~ File) +
       theme_bw() 
+  }
+  if(length(unique(turbidityCTMD$File)) > 1){
+    p = p + facet_wrap(~ File) 
   }
   
   # how to plot the data
@@ -105,7 +106,7 @@ shinyServer(function(input, output, session) {
       df = list()
       for(i in 1:nrow(input$input_file)){
         x = read.delim(F[1], sep='\t', skip=2, fill=TRUE, header=FALSE, 
-                             stringsAsFactors=TRUE, col.names=tbl_cols)
+                        stringsAsFactors=TRUE, col.names=tbl_cols)
         x$File = input$input_file[i,'name']
         df[[i]] = x
       }
@@ -114,6 +115,7 @@ shinyServer(function(input, output, session) {
     if(input$input_text != ''){
       df = read.delim(text=input$input_text, sep='\t', skip=2, fill=TRUE, header=FALSE,
                       stringsAsFactors=TRUE, col.names=tbl_cols)
+      df$File = 'Pasted_text'
     }
     # calculations
     turbidityCalculator(df, time_unit=input$time_unit, round_unit=input$round_unit)
