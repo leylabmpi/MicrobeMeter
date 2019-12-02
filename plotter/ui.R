@@ -19,6 +19,12 @@ shinyUI(fluidPage(
                                     choices = c('smooth' = 'smooth',
                                                 'points' = 'points'),
                                     selected = 'smooth'),
+                 checkboxGroupInput('which_ports',
+                                    label = 'Which ports to plot?',
+                                    choices = c('Port_1' = 'Port_1',
+                                                'Port_2' = 'Port_2',
+                                                'Port_3' = 'Port_3'),
+                                    selected = c('Port_1', 'Port_2', 'Port_3')),
                  numericInput('round_unit', 
                               label='Rounding units', 
                               value=3, min=0, max=10)

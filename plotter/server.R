@@ -14,7 +14,7 @@ load_ex_data = function(){
   return(df)
 }
 
-turbidityCalculator = function(turbidityCTMD, time_unit=1, round_unit=3) {
+turbidityCalculator = function(turbidityCTMD, time_unit=1, round_unit=3, ports=NULL) {
   # formatting 
   time_unit = as.numeric(time_unit)
   colnames(turbidityCTMD) = c('Time', 'Temperature', 'Port_1', 
@@ -47,6 +47,15 @@ turbidityCalculator = function(turbidityCTMD, time_unit=1, round_unit=3) {
            Port_1 = round(Port_1, round_unit),
            Port_2 = round(Port_2, round_unit),
            Port_3 = round(Port_3, round_unit))
+  
+  # filter to certain ports
+  if (! is.null(ports)){
+    to_keep = setdiff(colnames(turbidityCTMD), c('Port_1', 'Port_2', 'Port_3'))
+    to_keep = c(to_keep, ports)
+    turbidityCTMD = turbidityCTMD[, to_keep]
+  } else {
+    return(NULL)
+  }
   
   # return
   return(turbidityCTMD)
@@ -118,7 +127,7 @@ shinyServer(function(input, output, session) {
       df$File = 'Pasted_text'
     }
     # calculations
-    turbidityCalculator(df, time_unit=input$time_unit, round_unit=input$round_unit)
+    turbidityCalculator(df, time_unit=input$time_unit, round_unit=input$round_unit, ports = input$which_ports)
   })
   
   output$inputProvided = reactive({
