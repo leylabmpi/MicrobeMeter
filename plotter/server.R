@@ -63,7 +63,8 @@ turbidityCalculator = function(turbidityCTMD, time_unit=1, round_unit=3, ports=N
   
 
 turbidity_plot = function(turbidityCTMD, plot_type=c('smooth'), 
-                          time_unit=1, plot_content='turbidity'){
+                          time_unit=1, plot_content='turbidity',
+                          smooth_method='auto', smooth_span=NA){
   if(is.null(turbidityCTMD) || nrow(turbidityCTMD) < 1){
     return(NULL)
   }
@@ -94,7 +95,11 @@ turbidity_plot = function(turbidityCTMD, plot_type=c('smooth'),
     p = p + geom_point(size=0.5, alpha=0.7) 
   }
   if('smooth' %in% plot_type){
-    p = p + geom_smooth(size=0.75)
+    if(is.na(smooth_span)){
+      p = p + geom_smooth(size=0.75, method=smooth_method)
+    } else {
+      p = p + geom_smooth(size=0.75, method=smooth_method, span=smooth_span)
+    }
   } 
 
   return(p)
@@ -144,7 +149,9 @@ shinyServer(function(input, output, session) {
     turbidity_plot(df, 
                    plot_type=input$plot_type,
                    time_unit=input$time_unit,
-                   plot_content='turbidity')
+                   plot_content='turbidity',
+                   smooth_method=input$smooth_method, 
+                   smooth_span=input$smooth_span)
   })
   # plotly object of temperature
   output$temperature_curve = renderPlotly({

@@ -18,7 +18,7 @@ shinyUI(fluidPage(
                                     label = 'What to plot',
                                     choices = c('smooth' = 'smooth',
                                                 'points' = 'points'),
-                                    selected = 'smooth'),
+                                    selected = 'points'),
                  checkboxGroupInput('which_ports',
                                     label = 'Which ports to plot?',
                                     choices = c('Port_1' = 'Port_1',
@@ -27,7 +27,10 @@ shinyUI(fluidPage(
                                     selected = c('Port_1', 'Port_2', 'Port_3')),
                  numericInput('round_unit', 
                               label='Rounding units', 
-                              value=3, min=0, max=10)
+                              value=3, min=0, max=10),
+                 hr(),
+                 textInput('smooth_method', label = 'geom_smooth() method', value = 'auto'),
+                 numericInput('smooth_span', label = 'geom_smooth() span', value = NA, min=0)
     ),
     mainPanel(
       h4("Convert table between labware plate format and a long table format"),
