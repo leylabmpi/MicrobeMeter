@@ -175,7 +175,13 @@ shinyServer(function(input, output, session) {
       pageLength = 10,
       lengthMenu = c(10, 100, 500, -1),
       dom = 'Blfrtip',
-      buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+      buttons = list(
+        list(extend = "copy", title = NULL), 
+        'csv', 
+        list(extend = 'excel', title = NULL),
+        'pdf', 
+        'print'
+      )
     )
   )
   
@@ -189,7 +195,13 @@ shinyServer(function(input, output, session) {
       pageLength = 10,
       lengthMenu = c(10, 100, 500),
       dom = 'Blfrtip',
-      buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+      buttons = list(
+        list(extend = "copy", title = NULL), 
+        'csv', 
+        list(extend = 'excel', title = NULL),
+        'pdf', 
+        'print'
+      )
     )
   )
 })
