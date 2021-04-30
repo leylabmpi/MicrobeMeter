@@ -111,24 +111,38 @@ turbidity_plot = function(turbidityCTMD, plot_type=c('smooth'),
   return(p)
 }
 
+#' adding sample names (if provided) to turbidity data
 add_sample_names = function(df_data, df_names){
   if(is.null(df_names)){
     return(df_data)
   }
-  # checking columns
+  # checking columns in sample names file
   for(x in c('File', 'Port', 'Sample')){
     if(! x %in% colnames(df_names)){
       stop('Cannot find', x, 'in sample names table')
     }
   }
+  # filtering out blanks
+  df_names = df_names %>%
+      filter(!grepl('^blank', Sample, ignore.case=TRUE))
+  # checking for unique sample names
+  if(length(unique(df_names$Sample)) != length(df_names$Sample)){
+    df_names = df_names %>%
+        group_by(Sample) %>%
+        mutate(X = row_number(1:length(Sample))) %>%
+        ungroup() %>%
+        mutate(Sample = paste(Sample, X, sep='-')) %>%
+        select(-X)
+  }
   # formatting
   df_data = df_data %>%
     gather('Port', 'Values', -Time, -Temperature, -File) %>%
     mutate(Port = gsub('Port_', '', Port) %>% as.numeric) %>%
-    inner_join(df_names, c('File', 'Port')) %>%
+    inner_join(df_names %>% mutate(File = File %>% as.character), 
+               c('File', 'Port')) %>%
     select(-Port) %>%
     rename('Port' = Sample) %>%
-    spread(Port, Values) 
+    spread(Port, Values)
   return(df_data)
 }
 
