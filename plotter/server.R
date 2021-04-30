@@ -14,6 +14,12 @@ load_ex_data = function(){
   return(df)
 }
 
+load_ex_names = function(){
+  F = './data/MicrobeMeter_validation1_names.tsv'
+  df = read.delim(F, sep='\t', fill=TRUE)
+  return(df)
+}
+
 turbidityCalculator = function(turbidityCTMD, time_unit=1, round_unit=3, ports=NULL) {
   # formatting 
   time_unit = as.numeric(time_unit)
@@ -105,10 +111,50 @@ turbidity_plot = function(turbidityCTMD, plot_type=c('smooth'),
   return(p)
 }
 
+add_sample_names = function(df_data, df_names){
+  if(is.null(df_names)){
+    return(df_data)
+  }
+  # checking columns
+  for(x in c('File', 'Port', 'Sample')){
+    if(! x %in% colnames(df_names)){
+      stop('Cannot find', x, 'in sample names table')
+    }
+  }
+  # formatting
+  df_data = df_data %>%
+    gather('Port', 'Values', -Time, -Temperature, -File) %>%
+    mutate(Port = gsub('Port_', '', Port) %>% as.numeric) %>%
+    inner_join(df_names, c('File', 'Port')) %>%
+    select(-Port) %>%
+    rename('Port' = Sample) %>%
+    spread(Port, Values) 
+  return(df_data)
+}
+
 #-- server --#
 shinyServer(function(input, output, session) {
   tbl_cols = c('Time',	'Temperature', 'Port_1',	'Port_2', 
                'Port_3', 'Port_4', 'X')
+  
+  # sample names (if provided)
+  df_samples = reactive({
+    # input file/text
+    if(is.null(input$sample_names)){
+      return(NULL)
+    } else {
+      F = rename_tmp_file(input$sample_names)
+      if(grepl('.xlsx*$', F)){
+        return(readxl::read_excel(F))
+      } else if(grepl('.csv$', F)){
+        delim = ','
+      } else {
+        delim = '\t'
+      }
+      return(read.delim(F, sep=delim))
+    }
+  })
+  
   # load & process data table
   df_turbidity = reactive({
     # input file/text
@@ -132,7 +178,9 @@ shinyServer(function(input, output, session) {
       df$File = 'Pasted_text'
     }
     # calculations
-    turbidityCalculator(df, time_unit=input$time_unit, round_unit=input$round_unit, ports = input$which_ports)
+    df = turbidityCalculator(df, time_unit=input$time_unit, round_unit=input$round_unit, ports = input$which_ports)
+    # adding sample names (if provided)
+    add_sample_names(df, df_samples())
   })
   
   output$inputProvided = reactive({
@@ -188,6 +236,24 @@ shinyServer(function(input, output, session) {
   # example data
   output$ex_data = DT::renderDataTable(
     load_ex_data(),
+    filter = 'bottom',
+    rownames= FALSE,
+    extensions = c('Buttons'),
+    options = list(
+      pageLength = 10,
+      lengthMenu = c(10, 100, 500),
+      dom = 'Blfrtip',
+      buttons = list(
+        list(extend = "copy", title = NULL), 
+        'csv', 
+        list(extend = 'excel', title = NULL),
+        'pdf', 
+        'print'
+      )
+    )
+  )
+  output$ex_names = DT::renderDataTable(
+    load_ex_names(),
     filter = 'bottom',
     rownames= FALSE,
     extensions = c('Buttons'),

@@ -37,12 +37,16 @@ shinyUI(fluidPage(
       tabsetPanel(type = 'tabs', 
                   tabPanel("Input",
                            fluidRow(
-                             column(6,
+                             column(4,
                                     fileInput('input_file', 
                                               'Upload >=1 MicrobeMeter output tables (tab-delimited)',
                                               multiple = TRUE)
                              ),
-                             column(2),
+                             column(4,
+                                    fileInput('sample_names', 
+                                              'Sample names file (see example input). Note: the file name must match the MicrobeMeter output file name!',
+                                              multiple = TRUE)
+                             ),
                              column(4,
                                     checkboxInput('paste_input', 'Paste input table instead of load >=1 file?')
                              )
@@ -64,8 +68,10 @@ shinyUI(fluidPage(
                            plotlyOutput('turbidity_curves')),
                   tabPanel('Temperature plot', 
                            plotlyOutput('temperature_curve')),
-                  tabPanel('Example input', 
-                           DT::dataTableOutput('ex_data'))
+                  tabPanel('Example data', 
+                           DT::dataTableOutput('ex_data')),
+                  tabPanel('Example names', 
+                           DT::dataTableOutput('ex_names'))
       )
     )
   )
