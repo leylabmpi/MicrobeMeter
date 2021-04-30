@@ -165,7 +165,7 @@ shinyServer(function(input, output, session) {
       F = apply(input$input_file, 1, rename_tmp_file)
       df = list()
       for(i in 1:nrow(input$input_file)){
-        x = read.delim(F[1], sep='\t', skip=2, fill=TRUE, header=FALSE, 
+        x = read.delim(F[[i]], sep='\t', skip=2, fill=TRUE, header=FALSE, 
                         stringsAsFactors=TRUE, col.names=tbl_cols)
         x$File = input$input_file[i,'name']
         df[[i]] = x
